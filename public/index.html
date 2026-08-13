@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0b1220"
+  >
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+
+  <meta
+    name="apple-mobile-web-app-title"
+    content="Nobitex Signal"
+  >
+
+  <link
+    rel="manifest"
+    href="/manifest.webmanifest"
+  >
+
+  <title>Nobitex Signal</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #0b1220;
+      color: #eef2f7;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    header {
+      padding:
+        calc(16px + env(safe-area-inset-top))
+        16px
+        16px;
+
+      background: #111a2b;
+      border-bottom: 1px solid #22304a;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    main {
+      max-width: 720px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .hero {
+      padding: 20px 0;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+    }
+
+    .muted {
+      color: #91a0b7;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight: 700;
+      background: #2b66b1;
+      color: white;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    .card {
+      background: #111a2b;
+      border: 1px solid #22304a;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 10px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .metric {
+      background: #151f32;
+      padding: 11px;
+      border-radius: 10px;
+    }
+
+    .metric small {
+      display: block;
+      color: #91a0b7;
+      margin-bottom: 5px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score {
+      color: #65e59b;
+      font-weight: 800;
+    }
+
+    .live {
+      color: #65e59b;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 25px 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+
+  <div>
+    <b>Nobitex Signal</b>
+
+    <div class="muted">
+      اسکن زنده بازارهای USDT نوبیتکس
+    </div>
+  </div>
+
+  <span class="live">
+    ● LIVE
+  </span>
+
+</header>
+
+<main>
+
+  <section class="hero">
+
+    <h1>
+      فرصت‌های بازار
+    </h1>
+
+    <p class="muted">
+      حالت فعلی:
+      <b>PAPER</b>
+      — هیچ سفارش واقعی ارسال نمی‌شود.
+    </p>
+
+  </section>
+
+  <div
+    style="
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    "
+  >
+
+    <button id="scan">
+      اسکن الآن
+    </button>
+
+    <button id="notify">
+      فعال‌کردن اعلان
+    </button>
+
+  </div>
+
+  <p
+    id="status"
+    class="muted"
+  >
+    در حال آماده‌سازی...
+  </p>
+
+  <section id="signals"></section>
+
+  <div class="card">
+
+    <b>
+      نصب روی آیفون
+    </b>
+
+    <p class="muted">
+      بعد از فعال‌شدن نسخه نهایی،
+      در Safari گزینه
+      Share → Add to Home Screen
+      را بزن تا Nobitex Signal
+      مثل یک اپ روی صفحه اصلی قرار بگیرد.
+    </p>
+
+  </div>
+
+</main>
+
+<script>
+
+const $ = id =>
+  document.getElementById(id);
+
+const formatNumber = number =>
+  Number(number).toLocaleString(
+    "en-US",
+    {
+      maximumFractionDigits: 8
+    }
+  );
+
+function signalCard(signal) {
+
+  return `
+    <article class="card">
+
+      <div class="row">
+
+        <b>
+          ${signal.symbol}
+        </b>
+
+        <span class="score">
+          ${signal.score}/10
+        </span>
+
+      </div>
+
+      <p class="muted">
+        ${signal.setup}
+        • R/R ${signal.rr}
+      </p>
+
+      <div class="grid">
+
+        <div class="metric">
+          <small>
+            Entry
+          </small>
+
+          <b>
+            ${formatNumber(signal.entry)}
+          </b>
+        </div>
+
+        <div class="metric">
+          <small>
+            Stop Loss
+          </small>
+
+          <b>
+            ${formatNumber(signal.stopLoss)}
+          </b>
+        </div>
+
+        <div class="metric">
+          <small>
+            TP1
+          </small>
+
+          <b>
+            ${formatNumber(signal.tp1)}
+          </b>
+        </div>
+
+        <div class="metric">
+          <small>
+            TP2
+          </small>
+
+          <b>
+            ${formatNumber(signal.tp2)}
+          </b>
+        </div>
+
+      </div>
+
+      <p class="muted">
+
+        RSI:
+        ${signal.rsi}
+
+        • تغییر روزانه:
+        ${Number(signal.dayChange).toFixed(2)}%
+
+      </p>
+
+    </article>
+  `;
+}
+
+async function scanMarket() {
+
+  $("status").textContent =
+    "در حال اسکن بازار نوبیتکس...";
+
+  try {
+
+    const response =
+      await fetch("/api/scan");
+
+    const data =
+      await response.json();
+
+    if (
+      !data.signals ||
+      data.signals.length === 0
+    ) {
+
+      $("signals").innerHTML = `
+        <div class="card empty">
+
+          <b>
+            فعلاً موقعیت مناسبی پیدا نشد.
+          </b>
+
+          <p class="muted">
+            سیستم به‌صورت خودکار دوباره
+            بازار را بررسی می‌کند.
+          </p>
+
+        </div>
+      `;
+
+    } else {
+
+      $("signals").innerHTML =
+        data.signals
+          .map(signalCard)
+          .join("");
+
+    }
+
+    $("status").textContent =
+      "آخرین اسکن: " +
+      new Date().toLocaleTimeString(
+        "fa-IR"
+      );
+
+  } catch (error) {
+
+    $("status").textContent =
+      "خطا در اتصال: " +
+      error.message;
+
+  }
+
+}
+
+async function enableNotifications() {
+
+  if (
+    !("serviceWorker" in navigator)
+  ) {
+
+    $("status").textContent =
+      "Service Worker در این مرورگر فعال نیست.";
+
+    return;
+
+  }
+
+  if (
+    !("PushManager" in window)
+  ) {
+
+    $("status").textContent =
+      "Push Notification در این حالت در دسترس نیست.";
+
+    return;
+
+  }
+
+  if (
+    !("Notification" in window)
+  ) {
+
+    $("status").textContent =
+      "اعلان‌های مرورگر در دسترس نیست.";
+
+    return;
+
+  }
+
+  const permission =
+    await Notification.requestPermission();
+
+  if (
+    permission !== "granted"
+  ) {
+
+    $("status").textContent =
+      "اجازه اعلان داده نشد.";
+
+    return;
+
+  }
+
+  const keyResponse =
+    await fetch(
+      "/api/vapid-public-key"
+    );
+
+  const keyData =
+    await keyResponse.json();
+
+  if (!keyData.key) {
+
+    $("status").textContent =
+      "Push هنوز روی سرور پیکربندی نشده است.";
+
+    return;
+
+  }
+
+  const registration =
+    await navigator.serviceWorker.register(
+      "/sw.js"
+    );
+
+  const applicationServerKey =
+    Uint8Array.from(
+      atob(
+        keyData.key
+          .replace(/-/g, "+")
+          .replace(/_/g, "/")
+      ),
+      char =>
+        char.charCodeAt(0)
+    );
+
+  const subscription =
+    await registration.pushManager.subscribe(
+      {
+        userVisibleOnly: true,
+        applicationServerKey
+      }
+    );
+
+  await fetch(
+    "/api/push/subscribe",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json"
+      },
+
+      body:
+        JSON.stringify(
+          subscription
+        )
+    }
+  );
+
+  $("status").textContent =
+    "اعلان‌ها با موفقیت فعال شدند.";
+
+}
+
+$("scan").onclick =
+  scanMarket;
+
+$("notify").onclick =
+  enableNotifications;
+
+scanMarket();
+
+setInterval(
+  scanMarket,
+  15 * 60 * 1000
+);
+
+</script>
+
+</body>
+</html>
